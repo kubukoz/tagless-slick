@@ -1,0 +1,22 @@
+val commonSettings = Seq(
+  scalaVersion := "2.11.7",
+  scalacOptions ++= Seq(
+    "-Ypartial-unification",
+    "-language:higherKinds",
+    "-language:existentials",
+    "-language:implicitConversions",
+    "-feature"
+  ),
+  libraryDependencies ++= Seq(
+    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full),
+    "com.typesafe.slick"   %% "slick"                % "3.2.3",
+    "co.fs2"               %% "fs2-reactive-streams" % "1.0.0-RC1",
+    "com.github.mpilquist" %% "simulacrum"           % "0.13.0",
+    "org.postgresql"       % "postgresql"            % "42.2.4"
+  )
+)
+
+val core = project.settings(commonSettings)
+
+val taglessSlick = project.in(file(".")).settings(commonSettings).dependsOn(core).aggregate(core)
