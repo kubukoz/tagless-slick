@@ -2,10 +2,10 @@ package com.kubukoz.slick.algebra
 
 import com.kubukoz.slick.interpreter.StreamingDBIOInterpreter
 import fs2.Stream
-import slick.lifted.{Query => LiftedQuery}
+import slick.lifted.Query
 
 trait StreamingSelectAlgebra[F[_], E] extends SelectAlgebra[F, E] {
-  def stream[T](query: LiftedQuery[T, E, Seq]): Stream[F, E]
+  def stream[T](query: Query[T, E, Seq]): Stream[F, E]
 }
 
 object StreamingSelectAlgebra {
@@ -20,7 +20,7 @@ private[slick] abstract class InterpStreamingAlgebra[F[_], E]
     with StreamingSelectAlgebra[F, E] {
   protected def interpreter: StreamingDBIOInterpreter[F]
 
-  override def stream[T](query: LiftedQuery[T, E, Seq]): Stream[F, E] = interpreter.withApi.apply { api =>
+  override def stream[T](query: Query[T, E, Seq]): Stream[F, E] = interpreter.withApi.apply { api =>
     import api._
 
     interpreter.stream(query.result)

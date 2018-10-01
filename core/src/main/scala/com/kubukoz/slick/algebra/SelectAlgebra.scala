@@ -1,9 +1,9 @@
 package com.kubukoz.slick.algebra
 import com.kubukoz.slick.interpreter.DBIOInterpreter
-import slick.lifted.{Query => LiftedQuery}
+import slick.lifted.Query
 
 trait SelectAlgebra[F[_], E] {
-  def all[T](query: LiftedQuery[T, E, Seq]): F[List[E]]
+  def all[T](query: Query[T, E, Seq]): F[List[E]]
 }
 
 object SelectAlgebra {
@@ -15,7 +15,7 @@ object SelectAlgebra {
 private[slick] abstract class InterpSelectAlgebra[F[_], E] extends SelectAlgebra[F, E] {
   protected def interpreter: DBIOInterpreter[F]
 
-  override def all[T](query: LiftedQuery[T, E, Seq]): F[List[E]] = interpreter.withApi { api =>
+  override def all[T](query: Query[T, E, Seq]): F[List[E]] = interpreter.withApi { api =>
     import api._
 
     interpreter.eval(query.to[List].result)
