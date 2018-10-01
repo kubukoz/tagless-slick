@@ -5,7 +5,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.implicits._
 
-object AsyncUtils {
+private[interpreter] object AsyncUtils {
 
   def fromFuture[F[_]: Async, A](f: F[Future[A]]): F[A] = {
     //only for `onComplete` - non-blocking call

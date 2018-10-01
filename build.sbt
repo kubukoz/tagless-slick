@@ -1,6 +1,7 @@
 val commonSettings = Seq(
   scalaVersion := "2.12.7",
   scalacOptions ++= Options.all,
+  fork in Test := true,
   libraryDependencies ++= Seq(
     compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full),

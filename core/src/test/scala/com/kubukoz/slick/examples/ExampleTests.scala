@@ -1,27 +1,27 @@
 package com.kubukoz.slick.examples
 
 import cats.arrow.FunctionK
-import cats.{~>, Applicative, Show}
 import cats.effect._
-import cats.implicits._
 import cats.effect.concurrent.Ref
+import cats.implicits._
+import cats.{Applicative, Show, ~>}
 import com.kubukoz.slick.algebra.StreamingSelectAlgebra
 import com.kubukoz.slick.interpreter.StreamingDBIOInterpreter
 import fs2.Stream
 import fs2.Stream.Compiler
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import slick.jdbc.{JdbcProfile, PostgresProfile}
+import slick.lifted
 import slick.lifted.ProvenShape
+
+import scala.concurrent.ExecutionContext
 
 class ExampleTests extends AsyncFlatSpec with Matchers {
 
-  object internalss {
+  val profile: JdbcProfile = PostgresProfile
 
-    object profiles {
-      val profile: JdbcProfile = PostgresProfile
-    }
-
-    import profiles.profile.api._
+  object impl {
+    import profile.api._
 
     case class UserEntity(name: String, age: Int)
 
@@ -33,18 +33,20 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
       override def * : ProvenShape[UserEntity] = (name, age) <> (UserEntity.tupled, UserEntity.unapply)
     }
 
-    val db: Database =
-      Database.forURL("jdbc:postgresql://localhost/postgres", "postgres", "example", driver = "org.postgresql.Driver")
+    def db[F[_]: Sync]: Resource[F, Database] =
+      Resource.fromAutoCloseable(Sync[F].delay {
+        Database.forURL("jdbc:postgresql://localhost/postgres", "postgres", "example", driver = "org.postgresql.Driver")
+      })
   }
+
+  import profile.api._
 
   type StreamInts[F[_]] = StreamingSelectAlgebra[F, Int]
   def StreamInts[F[_]: StreamInts]: StreamInts[F] = implicitly
 
-  import internalss.profiles.profile.api._
-
   def program[F[_]: StreamInts: Console, G[_]: Applicative](implicit streamCompiler: Compiler[F, G],
                                                             fToG: F ~> G): G[List[Int]] = {
-    val q = TableQuery[internalss.Users].map(_.age)
+    val q = lifted.TableQuery[impl.Users].map(_.age)
 
     val printEach = StreamInts[F].stream(q).evalMap(age => Console[F].putStrLn(s"found age: $age")).compile.drain
 
@@ -53,10 +55,9 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
 
   //for production
   def abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[F[_]: ConcurrentEffect]
-    : F[List[Int]] = {
-
+    : F[List[Int]] = impl.db[F].use { db =>
     implicit val interpreter: StreamingDBIOInterpreter[F] =
-      StreamingDBIOInterpreter.streamingInterpreter[F](internalss.profiles.profile, internalss.db)
+      StreamingDBIOInterpreter.streamingInterpreter[F](profile, db)
 
     implicit val console: Console[F] = new SyncConsole[F]
 
@@ -93,6 +94,18 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
       )
 
       result shouldBe List(1, 2, 3)
+    }
+
+    test.unsafeToFuture()
+  }
+
+  "the real thing" should "do something too" in {
+    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
+
+    val test = for {
+      result <- abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO]
+    } yield {
+      result shouldBe List(21, 22)
     }
 
     test.unsafeToFuture()
