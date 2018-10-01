@@ -1,11 +1,10 @@
 package com.kubukoz.slick.examples
 
-import cats.implicits._
 import cats.effect._
+import cats.implicits._
 import com.kubukoz.slick.algebra.StreamingSelectAlgebra
 import com.kubukoz.slick.interpreter.StreamingDBIOInterpreter
 import fs2.Stream
-import slick.basic.DatabasePublisher
 import slick.jdbc.{JdbcProfile, PostgresProfile}
 import slick.lifted.{ProvenShape, TableQuery}
 
@@ -31,9 +30,9 @@ object Tests extends IOApp {
     Database.forURL("jdbc:postgresql://localhost/postgres", "postgres", "example", driver = "org.postgresql.Driver")
 
   def program[F[_]: StreamingSelectAlgebra]: Stream[F, Int] = {
-    StreamingSelectAlgebra[F].stream(
+    StreamingSelectAlgebra[F].stream {
       TableQuery[Users].map(_.age)
-    )
+    }
   }
 
   override def run(args: List[String]): IO[ExitCode] = {

@@ -3,16 +3,15 @@ package com.kubukoz.slick.interpreter
 import cats.effect.{Async, ConcurrentEffect}
 import cats.~>
 import fs2.Stream
-import simulacrum.typeclass
 import slick.dbio.StreamingDBIO
 import slick.jdbc.JdbcProfile
 
-@typeclass
 trait StreamingDBIOInterpreter[F[_]] extends DBIOInterpreter[F] {
   def stream[R]: StreamingDBIO[R, ?] ~> Stream[F, ?]
 }
 
 object StreamingDBIOInterpreter {
+  def apply[F[_]: StreamingDBIOInterpreter]: StreamingDBIOInterpreter[F] = implicitly
 
   def streamingInterpreter[F[_]: ConcurrentEffect](profile: JdbcProfile,
                                                    db: JdbcProfile#API#Database): StreamingDBIOInterpreter[F] =

@@ -4,11 +4,9 @@ import cats.effect.Async
 import cats.~>
 import com.kubukoz.slick.interpreter.DBIOInterpreter.WithApi
 import com.kubukoz.slick.interpreter.internal.AsyncUtils
-import simulacrum.typeclass
 import slick.dbio._
 import slick.jdbc.JdbcProfile
 
-@typeclass
 trait DBIOInterpreter[F[_]] {
   def profile: JdbcProfile
 
@@ -18,6 +16,7 @@ trait DBIOInterpreter[F[_]] {
 }
 
 object DBIOInterpreter {
+  def apply[F[_]: DBIOInterpreter]: DBIOInterpreter[F] = implicitly
 
   def interpreter[F[_]: Async](profile: JdbcProfile, db: JdbcProfile#API#Database): DBIOInterpreter[F] = {
     new AsyncInterpreter[F](profile, db) {
