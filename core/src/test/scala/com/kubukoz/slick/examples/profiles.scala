@@ -5,6 +5,7 @@ import cats.implicits._
 import com.kubukoz.slick.algebra.StreamingSelectAlgebra
 import com.kubukoz.slick.interpreter.StreamingDBIOInterpreter
 import fs2.Stream
+import fs2.Stream.Compiler
 import slick.jdbc.{JdbcProfile, PostgresProfile}
 import slick.lifted.{ProvenShape, TableQuery}
 
@@ -29,16 +30,25 @@ object Tests extends IOApp {
   val db: Database =
     Database.forURL("jdbc:postgresql://localhost/postgres", "postgres", "example", driver = "org.postgresql.Driver")
 
-  def program[F[_]: StreamingSelectAlgebra]: Stream[F, Int] = {
-    StreamingSelectAlgebra[F].stream {
-      TableQuery[Users].map(_.age)
-    }
+  def program[F[_]: StreamingSelectAlgebra: Console, G[_]](implicit streamCompiler: Compiler[F, G]): G[Unit] = {
+    StreamingSelectAlgebra[F]
+      .stream(TableQuery[Users].map(_.age))
+      .evalMap(age => Console[F].putStrLn(s"found age: $age"))
+      .compile
+      .drain
   }
 
-  override def run(args: List[String]): IO[ExitCode] = {
-    implicit val interpreter: StreamingDBIOInterpreter[IO] =
-      StreamingDBIOInterpreter.streamingInterpreter[IO](profiles.profile, db)
+  def abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[F[_]: ConcurrentEffect]
+    : F[Unit] = {
 
-    program[IO].evalMap(age => IO(println(s"found age: $age"))).compile.drain
-  }.as(ExitCode.Success)
+    implicit val interpreter: StreamingDBIOInterpreter[F] =
+      StreamingDBIOInterpreter.streamingInterpreter[F](profiles.profile, db)
+
+    implicit val console: Console[F] = new SyncConsole[F]
+
+    program[F, F]
+  }
+
+  override def run(args: List[String]): IO[ExitCode] =
+    abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO].as(ExitCode.Success)
 }
