@@ -16,4 +16,5 @@ val commonSettings = Seq(
 
 val core = project.settings(commonSettings)
 
-val taglessSlick = project.in(file(".")).settings(commonSettings).dependsOn(core).aggregate(core)
+val taglessSlick =
+  project.in(file(".")).settings(commonSettings).settings(name := "tagless-slick").dependsOn(core).aggregate(core)
