@@ -3,6 +3,7 @@ val commonSettings = Seq(
   scalacOptions ++= Options.all,
   fork in Test := true,
   name := "tagless-slick",
+  updateOptions := updateOptions.value.withGigahorse(false), //may fix publishing bug
   libraryDependencies ++= Seq(
     compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full),
