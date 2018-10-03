@@ -11,14 +11,11 @@ private[interpreter] object AsyncUtils {
     //only for `onComplete` - non-blocking call
     import ExecutionContext.Implicits.global
 
-    Async[F].asyncF { cb =>
-      f.flatMap { future =>
-        Sync[F].delay {
-          future.value match {
-            case Some(valueTry) => cb(valueTry.toEither)
-            case None           => future.onComplete(tried => cb(tried.toEither))
-          }
-        }
+    f.flatMap { future =>
+      future.value match {
+        case Some(valueTry) => Sync[F].fromTry(valueTry)
+        case None =>
+          Async[F].async(cb => future.onComplete(tried => cb(tried.toEither)))
       }
     }
   }
