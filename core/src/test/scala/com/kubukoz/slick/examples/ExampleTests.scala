@@ -63,6 +63,7 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
 
     implicit val idK: F ~> F = FunctionK.id[F]
 
+
     program[F, F]
   }
 
@@ -99,15 +100,15 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
     test.unsafeToFuture()
   }
 
-  "the real thing" should "do something too" in {
-    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
-
-    val test = for {
-      result <- abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO]
-    } yield {
-      result shouldBe List(21, 22)
-    }
-
-    test.unsafeToFuture()
-  }
+//  "the real thing" should "do something too" in {
+//    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
+//
+//    val test = for {
+//      result <- abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO]
+//    } yield {
+//      result shouldBe List(21, 22)
+//    }
+//
+//    test.unsafeToFuture()
+//  }
 }
