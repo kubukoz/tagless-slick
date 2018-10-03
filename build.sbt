@@ -2,6 +2,7 @@ val commonSettings = Seq(
   scalaVersion := "2.12.7",
   scalacOptions ++= Options.all,
   fork in Test := true,
+  name := "tagless-slick",
   libraryDependencies ++= Seq(
     compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.1").cross(CrossVersion.full),
@@ -14,7 +15,22 @@ val commonSettings = Seq(
   )
 )
 
-val core = project.settings(commonSettings)
+val core = project.settings(commonSettings).settings(name += "-core")
 
 val taglessSlick =
-  project.in(file(".")).settings(commonSettings).settings(name := "tagless-slick").dependsOn(core).aggregate(core)
+  project.in(file(".")).settings(commonSettings).dependsOn(core).aggregate(core)
+
+inThisBuild(
+  List(
+    organization := "com.kubukoz",
+    homepage := Some(url("https://github.com/kubukoz/tagless-slick")),
+    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(
+      Developer(
+        "kubukoz",
+        "Jakub Kozłowski",
+        "kubukoz@gmail.com",
+        url("https://kubukoz.com")
+      )
+    )
+  ))
