@@ -4,7 +4,7 @@ import cats.arrow.FunctionK
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import cats.{Applicative, Show, ~>}
+import cats.{~>, Applicative, Show}
 import com.kubukoz.slick.algebra.StreamingSelectAlgebra
 import com.kubukoz.slick.interpreter.StreamingDBIOInterpreter
 import fs2.Stream
@@ -62,7 +62,6 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
     implicit val console: Console[F] = new SyncConsole[F]
 
     implicit val idK: F ~> F = FunctionK.id[F]
-
 
     program[F, F]
   }
