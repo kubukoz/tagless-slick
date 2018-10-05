@@ -99,15 +99,15 @@ class ExampleTests extends AsyncFlatSpec with Matchers {
     test.unsafeToFuture()
   }
 
-//  "the real thing" should "do something too" in {
-//    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
-//
-//    val test = for {
-//      result <- abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO]
-//    } yield {
-//      result shouldBe List(21, 22)
-//    }
-//
-//    test.unsafeToFuture()
-//  }
+  "the real thing" should "do something too" in {
+    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
+
+    val test = for {
+      result <- abstractApplicationProxyBeanFactoryDelegateProviderRepositoryInjectionStrategyVisitor[IO]
+    } yield {
+      result shouldBe List(22, 35)
+    }
+
+    test.unsafeToFuture()
+  }
 }
