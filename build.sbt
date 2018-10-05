@@ -25,7 +25,7 @@ val commonSettings = Seq(
     "com.typesafe.slick"   %% "slick"                % "3.2.3",
     "co.fs2"               %% "fs2-reactive-streams" % "1.0.0",
     "com.github.mpilquist" %% "simulacrum"           % "0.13.0",
-    "org.postgresql"       % "postgresql"            % "42.2.4",
+    "org.postgresql"       % "postgresql"            % "42.2.4" % Test,
     "com.github.gvolpe"    %% "console4cats"         % "0.3" % Test,
     "org.scalatest"        %% "scalatest"            % "3.0.4" % Test
   )
