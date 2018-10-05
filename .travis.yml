@@ -2,7 +2,7 @@ language: scala
 scala:
 - 2.12.7
 jdk:
-- openjdk8
+- oraclejdk8
 cache:
   directories:
     - $HOME/.sbt/1.0/dependency
