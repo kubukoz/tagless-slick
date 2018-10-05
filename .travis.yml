@@ -26,7 +26,7 @@ jobs:
   include:
   # stage="test" if no stage is specified
   - script:
-    - docker run -p 5432:5432 postgres:10.2
+    - docker run -d -p 5432:5432 postgres:10.2
     - psql -U postgres postgres -h localhost < core/src/test/resources/init.sql
     - sbt test:compile test
   # run ci-release only if previous stages passed
