@@ -14,7 +14,7 @@ inThisBuild(
   ))
 
 val commonSettings = Seq(
-  scalaVersion := "2.12.7",
+  scalaVersion := "2.12.6",
   scalacOptions ++= Options.all,
   fork in Test := true,
   name := "tagless-slick",
