@@ -18,6 +18,6 @@ private[slick] abstract class InterpSelectAlgebra[F[_], E] extends SelectAlgebra
   override def all(query: Query[_, E, Seq]): F[List[E]] = interpreter.withApi { api =>
     import api._
 
-    interpreter.eval(query.to[List].result)
+    interpreter.interpret(query.to[List].result)
   }
 }

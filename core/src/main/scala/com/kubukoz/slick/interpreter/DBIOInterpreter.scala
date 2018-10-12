@@ -1,26 +1,30 @@
 package com.kubukoz.slick.interpreter
 
-import cats.effect.Async
+import cats.arrow.FunctionK
+import cats.effect.{Async, Concurrent}
+import cats.tagless.finalAlg
 import cats.~>
 import com.kubukoz.slick.interpreter.DBIOInterpreter.WithApi
 import com.kubukoz.slick.interpreter.internal.AsyncUtils
 import slick.dbio._
 import slick.jdbc.JdbcProfile
 
-trait DBIOInterpreter[F[_]] {
-  def profile: JdbcProfile
+@finalAlg
+trait DBIOInterpreter[F[_]] { self =>
+  protected def profile: JdbcProfile
 
-  def eval: DBIO ~> F
+  def interpret: DBIO ~> F
 
   private[slick] final def withApi: WithApi = new WithApi(profile)
+
+  def withPreparation(preInterpret: DBIO ~> DBIO): DBIOInterpreter[F]
 }
 
 object DBIOInterpreter {
-  def apply[F[_]: DBIOInterpreter]: DBIOInterpreter[F] = implicitly
 
-  def interpreter[F[_]: Async](profile: JdbcProfile, db: JdbcProfile#API#Database): DBIOInterpreter[F] = {
-    new AsyncInterpreter[F](profile, db) {
-      override protected def F: Async[F] = Async[F]
+  def interpreter[F[_]: Concurrent](profile: JdbcProfile, db: JdbcProfile#API#Database): DBIOInterpreter[F] = {
+    new AsyncInterpreter[F](profile, db, FunctionK.id) {
+      override protected val F: Async[F] = Async[F]
     }
   }
 
@@ -29,9 +33,18 @@ object DBIOInterpreter {
   }
 }
 
-private[interpreter] abstract class AsyncInterpreter[F[_]](val profile: JdbcProfile, db: JdbcProfile#API#Database)
-    extends DBIOInterpreter[F] {
+private[interpreter] abstract class AsyncInterpreter[F[_]](val profile: JdbcProfile,
+                                                           db: JdbcProfile#API#Database,
+                                                           rawTrans: DBIO ~> DBIO)
+    extends DBIOInterpreter[F] { self =>
   protected implicit def F: Async[F]
 
-  override val eval: DBIO ~> F = λ[DBIO ~> F](dbio => AsyncUtils.fromFuture(F.delay(db.run(dbio))))
+  private def runDBIO[A](dbio: DBIO[A]): F[A] = AsyncUtils.fromFuture(F.delay(db.run(dbio)))
+
+  override val interpret: DBIO ~> F = rawTrans.andThen(λ[DBIO ~> F](runDBIO(_)))
+
+  override def withPreparation(preInterpret: ~>[DBIO, DBIO]): DBIOInterpreter[F] =
+    new AsyncInterpreter[F](profile, db, preInterpret.andThen(rawTrans)) {
+      override protected implicit def F: Async[F] = self.F
+    }
 }
